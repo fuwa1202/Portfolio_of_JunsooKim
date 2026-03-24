@@ -5,7 +5,7 @@ VERSION = "104.2"
 =============================================================================
 PROTEIN MASTER SCREENER (Version 104.2 - INLINE INTERPRETATION)
 =============================================================================
-Author: Kim Junsu
+Author: Kim Junsoo
 Description: 
     Analyzes multi-chain complexes as single entities.
     Each analysis tool outputs to its own folder with individual reports.
