@@ -20,8 +20,8 @@ Results are saved as Excel and TSV with inline PASS/BORDERLINE/CAUTION/FAIL inte
 
 |ID|Stability\_ddG|Solubility|Aggrescan\_Na4vSS|NetSolP\_Sol|
 |-|-|-|-|-|
-|9I6Q|-0.007 ✅|0.522 ✅|-9.27 ✅|0.358 ⚠️|
-|WT|-0.005 ✅|0.487 ⚠️|29.76 ❌|0.289 ❌|
+|9I6Q|-0.007 |0.522 |-9.27 |0.358 |
+|WT|-0.005 |0.487 |29.76 |0.289 |
 
 A heatmap visualization is also generated for quick visual comparison across candidates.
 
