@@ -5,7 +5,7 @@ VERSION = "104.2"
 =============================================================================
 PROTEIN MASTER SCREENER (Version 104.2 - INLINE INTERPRETATION)
 =============================================================================
-Author: Gemini CLI Agent & Kim Junsu, Extended by Claude
+Author: Kim Junsu
 Description: 
     Analyzes multi-chain complexes as single entities.
     Each analysis tool outputs to its own folder with individual reports.
