@@ -15,24 +15,7 @@ Given a set of protein structure files, this pipeline automatically runs 6 analy
 
 ## Pipeline Architecture
 
-```mermaid
-flowchart TD
-    A[Input: .pdb / .cif files] --> B[Structure Preprocessing\nchain parsing · renumbering · HETATM removal]
-
-    B --> C1[ThermoMPNN\nThermal Stability]
-    B --> C2[GATSol\nStructural Solubility]
-    B --> C3[MixMHCpred / MixMHC2pred\nImmunogenicity]
-    B --> C4[Aggrescan\nAggregation - classic]
-    B --> C5[AggNet\nAggregation - DL]
-    B --> C6[NetSolP\nE. coli Expression]
-
-    C1 --> D[Summary Report\nExcel + TSV + Heatmaps]
-    C2 --> D
-    C3 --> D
-    C4 --> D
-    C5 --> D
-    C6 --> D
-```
+<img src="pipeline_architecture.svg" width="100%"/>
 
 ## Acceptance Criteria
 
@@ -50,10 +33,10 @@ flowchart TD
 
 Results are saved as Excel and TSV with inline PASS/BORDERLINE/CAUTION/FAIL interpretation per metric.
 
-| ID   | Stability_ddG | Solubility | Aggrescan_Na4vSS | NetSolP_Sol |
-|------|--------------|------------|-----------------|-------------|
-| 9I6Q | -0.007 (PASS) | 0.522 (PASS) | -9.27 (PASS) | 0.358 (CAUTION) |
-| WT   | -0.005 (PASS) | 0.487 (BORDERLINE) | 29.76 (FAIL) | 0.289 (FAIL) |
+| ID   | Stability_ddG | Solubility (GATSol) | Aggrescan_Na4vSS | AggNet_APR_frac | NetSolP_Sol | MHC-I (HLA-A02:01) | MHC-II (DRB1_03_01) |
+|------|--------------|---------------------|-----------------|-----------------|-------------|---------------------|----------------------|
+| 9I6Q | -0.007 (PASS) | 0.522 (PASS) | -9.27 (PASS) | 0.228 (FAIL) | 0.358 (CAUTION) | 39.9 (CAUTION) | 50.9 (PASS) |
+| WT   | -0.005 (PASS) | 0.487 (BORDERLINE) | 29.76 (FAIL) | 0.405 (FAIL) | 0.289 (FAIL) | 36.4 (CAUTION) | 49.0 (PASS) |
 
 A heatmap visualization is also generated for quick visual comparison across candidates.
 
@@ -63,15 +46,15 @@ A heatmap visualization is also generated for quick visual comparison across can
 
 Each tool runs in its own conda environment. Clone each repository and set up the corresponding environment before running the pipeline.
 
-| Tool | conda env | Repository |
+| Tool | Execution | Repository |
 |------|-----------|------------|
-| ThermoMPNN | `thermoMPNN` | https://github.com/Kuhlman-Lab/ThermoMPNN |
-| GATSol | `GATSol` | https://github.com/binbinbinv/GATSol |
-| Aggrescan | (base) | https://bioinf.uab.es/aggrescan/ (web server, no public repo) |
-| AggNet | (base) | https://github.com/Hill-Wenka/AggNet |
-| NetSolP | `netsolp` | https://github.com/TviNet/NetSolP-1.0 |
-| MixMHCpred (MHC-I) | `mhc1_env` | https://github.com/GfellerLab/MixMHCpred |
-| MixMHC2pred (MHC-II) | `mhc1_env` | https://github.com/GfellerLab/MixMHC2pred |
+| ThermoMPNN | conda env `thermoMPNN` | https://github.com/Kuhlman-Lab/ThermoMPNN |
+| GATSol | conda env `GATSol` | https://github.com/binbinbinv/GATSol |
+| Aggrescan | python3 direct | Custom implementation based on Conchillo-Sole et al. (2007) |
+| AggNet | conda env `AggNet` | https://github.com/Hill-Wenka/AggNet |
+| NetSolP | conda env `netsolp` | https://github.com/TviNet/NetSolP-1.0 |
+| MixMHCpred (MHC-I) | dedicated Python env | https://github.com/GfellerLab/MixMHCpred |
+| MixMHC2pred (MHC-II) | dedicated Python env | https://github.com/GfellerLab/MixMHC2pred |
 
 Once all tools are installed, update the `CONFIG` block at the top of `master_batch_analysis.py` to match your local paths:
 
