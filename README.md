@@ -15,18 +15,23 @@ Given a set of protein structure files, this pipeline automatically runs 6 analy
 
 ## Pipeline Architecture
 
-```
-Input: .pdb / .cif files
-        |
-        v
- Structure Preprocessing        BioPython -- chain parsing, renumbering, HETATM removal
-        |
-[1] ThermoMPNN    [2] GATSol          Stability & solubility (structure-based)
-[3] MixMHCpred/2  [4] Aggrescan       Immunogenicity & aggregation (sequence-based)
-[5] AggNet        [6] NetSolP         Aggregation (DL) & E.coli expression
-        |
-        v
- Summary Report                 Excel + TSV with interpretation + heatmaps
+```mermaid
+flowchart TD
+    A[Input: .pdb / .cif files] --> B[Structure Preprocessing\nchain parsing · renumbering · HETATM removal]
+
+    B --> C1[ThermoMPNN\nThermal Stability]
+    B --> C2[GATSol\nStructural Solubility]
+    B --> C3[MixMHCpred / MixMHC2pred\nImmunogenicity]
+    B --> C4[Aggrescan\nAggregation - classic]
+    B --> C5[AggNet\nAggregation - DL]
+    B --> C6[NetSolP\nE. coli Expression]
+
+    C1 --> D[Summary Report\nExcel + TSV + Heatmaps]
+    C2 --> D
+    C3 --> D
+    C4 --> D
+    C5 --> D
+    C6 --> D
 ```
 
 ## Acceptance Criteria
