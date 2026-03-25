@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-VERSION = "104.2"
+VERSION = "1.0.0"
 
 """
 =============================================================================
-PROTEIN MASTER SCREENER (Version 104.2 - INLINE INTERPRETATION)
+PROTEIN MASTER SCREENER (Version 1.0.0 - INLINE INTERPRETATION)
 =============================================================================
 Author: Kim Junsoo
 Description: 
@@ -53,7 +53,7 @@ CONFIG = {
 METRIC_CRITERIA = {
     "Stability_ddG": {
         "direction": "lower", "threshold": 0.0, "unit": "kcal/mol",
-        "criteria_text": "구조 안정성 변화량(kcal/mol). 음수=안정화 | Criteria: ddG < 0",
+        "criteria_text": "구조 안정성 변화량(kcal/mol). 음수=안정화 | Criteria: ddG < 0 (PASS), 0~0.5 (BORDERLINE), >0.5 (FAIL)",
         "interpret": lambda v: "PASS - Stabilizing" if v < -0.5 else
                      "PASS - Mildly stabilizing" if v < 0 else
                      "BORDERLINE - Neutral" if v < 0.5 else
@@ -61,7 +61,7 @@ METRIC_CRITERIA = {
     },
     "Solubility": {
         "direction": "higher", "threshold": 0.5, "unit": "probability",
-        "criteria_text": "구조 기반 가용성 예측 확률(0~1). 높을수록 가용성 좋음 | Criteria: > 0.5",
+        "criteria_text": "구조 기반 가용성 예측 확률(0~1). 높을수록 가용성 좋음 | Criteria: ≥0.5 (PASS), 0.4~0.5 (BORDERLINE), <0.4 (FAIL)",
         "interpret": lambda v: "PASS - Highly soluble" if v >= 0.7 else
                      "PASS - Soluble" if v >= 0.5 else
                      "BORDERLINE - Moderate" if v >= 0.4 else
@@ -138,7 +138,7 @@ METRIC_CRITERIA = {
 # Lower average = more peptides bind MHC = higher immunogenicity risk.
 MHC_CRITERIA = {
     "M1": {
-        "direction": "higher", "threshold": 50.0, "unit": "avg %Rank",
+        "direction": "higher", "threshold": 40.0, "unit": "avg %Rank",
         "criteria_text": "MHC-I 전체 펩타이드 평균 %Rank. 높을수록 면역원성 낮음 | Criteria: avg > 40",
         "interpret": lambda v: "PASS - Low immunogenicity" if v >= 45 else
                      "PASS - Acceptable" if v >= 40 else
@@ -146,7 +146,7 @@ MHC_CRITERIA = {
                      "FAIL - High immunogenicity risk"
     },
     "M2": {
-        "direction": "higher", "threshold": 50.0, "unit": "avg %Rank",
+        "direction": "higher", "threshold": 40.0, "unit": "avg %Rank",
         "criteria_text": "MHC-II 전체 펩타이드 평균 %Rank. 높을수록 면역원성 낮음 | Criteria: avg > 40",
         "interpret": lambda v: "PASS - Low immunogenicity" if v >= 50 else
                      "PASS - Acceptable" if v >= 40 else
@@ -258,42 +258,42 @@ def get_standardized_assembly(input_p, output_p):
     struct = parser.get_structure('x', str(input_p))
     full_seq_list = []
     chain_info_list = []
-    model = struct[0]  # Process only the first model (C5 fix)
-    if True:  # preserving indentation block
-        # Collect original chain IDs and sequences before renumbering
-        orig_chains = []
-        for chain in model:
-            chain_seq = []
-            for residue in chain.get_residues():
-                if residue.id[0] == " ":
-                    aa = D3TO1.get(residue.get_resname(), '')
-                    if aa: chain_seq.append(aa)
-            if chain_seq:
-                orig_chains.append({"chain_id": chain.id, "seq": "".join(chain_seq)})
-        # Renumber residues globally
-        temp_id = 90000
-        for chain in model:
-            for residue in list(chain.get_residues()):
-                if residue.id[0] == " ":
-                    temp_id += 1
-                    residue.id = (' ', temp_id, ' ')
-        global_idx = 0
-        for chain in model:
-            chain_seq = []
-            for residue in list(chain.get_residues()):
-                if residue.id[0] == " ":
-                    global_idx += 1
-                    residue.id = (' ', global_idx, ' ')
-                    aa = D3TO1.get(residue.get_resname(), '')
-                    if aa: chain_seq.append(aa)
-            if chain_seq: full_seq_list.append("".join(chain_seq))
-        # Build chain_info from original data
-        for ci in orig_chains:
-            chain_info_list.append({
-                "chain_id": ci["chain_id"],
-                "length": len(ci["seq"]),
-                "seq": ci["seq"],
-            })
+    model = struct[0]  # Process only the first model
+
+    # Collect original chain IDs and sequences before renumbering
+    orig_chains = []
+    for chain in model:
+        chain_seq = []
+        for residue in chain.get_residues():
+            if residue.id[0] == " ":
+                aa = D3TO1.get(residue.get_resname(), '')
+                if aa: chain_seq.append(aa)
+        if chain_seq:
+            orig_chains.append({"chain_id": chain.id, "seq": "".join(chain_seq)})
+    # Renumber residues globally
+    temp_id = 90000
+    for chain in model:
+        for residue in list(chain.get_residues()):
+            if residue.id[0] == " ":
+                temp_id += 1
+                residue.id = (' ', temp_id, ' ')
+    global_idx = 0
+    for chain in model:
+        chain_seq = []
+        for residue in list(chain.get_residues()):
+            if residue.id[0] == " ":
+                global_idx += 1
+                residue.id = (' ', global_idx, ' ')
+                aa = D3TO1.get(residue.get_resname(), '')
+                if aa: chain_seq.append(aa)
+        if chain_seq: full_seq_list.append("".join(chain_seq))
+    # Build chain_info from original data
+    for ci in orig_chains:
+        chain_info_list.append({
+            "chain_id": ci["chain_id"],
+            "length": len(ci["seq"]),
+            "seq": ci["seq"],
+        })
     io = PDBIO()
     io.set_structure(struct)
     io.save(str(output_p), AssemblySelect())
